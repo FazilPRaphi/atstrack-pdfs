@@ -173,6 +173,7 @@ export default function Merge() {
                     <RefreshCw size={18} />
                     <span>Merge More</span>
                   </button>
+                console.log("ENV:", import.meta.env.VITE_BACKEND_URL);
                 </div>
               </Motion.div>
             )}
