@@ -1,44 +1,80 @@
 import axios from "axios";
 
+// 🔥 ENV CONFIG
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
+
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || `${BACKEND_URL}/api`;
-const DOWNLOAD_BASE_URL = import.meta.env.VITE_DOWNLOAD_BASE_URL || `${BACKEND_URL}/downloads`;
 
-const pollJobStatus = async (jobId) => {
-  let job;
-  do {
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    const response = await axios.get(`${API_BASE_URL}/job/${jobId}`);
-    job = response.data;
-  } while (job.status === "processing");
+const DOWNLOAD_BASE_URL =
+  import.meta.env.VITE_DOWNLOAD_BASE_URL || `${BACKEND_URL}/downloads`;
 
-  if (job.status === "failed") {
-    throw new Error(job.error || "Processing failed on server");
+// 🔥 AXIOS INSTANCE (important for production)
+const apiClient = axios.create({
+  baseURL: API_BASE_URL,
+  timeout: 30000, // 30s timeout
+});
+
+// 🔥 SAFE DELAY FUNCTION
+const delay = (ms) => new Promise((res) => setTimeout(res, ms));
+
+// 🔥 JOB POLLING (FIXED)
+const pollJobStatus = async (jobId, maxAttempts = 30) => {
+  let attempts = 0;
+
+  while (attempts < maxAttempts) {
+    await delay(1000);
+
+    try {
+      const response = await apiClient.get(`/job/${jobId}`);
+      const job = response.data;
+
+      if (job.status === "completed") {
+        if (!job?.result?.file) {
+          throw new Error("Invalid file response from server");
+        }
+
+        return {
+          ...job.result,
+          downloadUrl: `${DOWNLOAD_BASE_URL}/${job.result.file}`, // ✅ FIXED
+        };
+      }
+
+      if (job.status === "failed") {
+        throw new Error(job.error || "Processing failed on server");
+      }
+
+      attempts++;
+    } catch (err) {
+      console.error("Polling error:", err);
+
+      if (attempts >= maxAttempts - 1) {
+        throw new Error("Server is taking too long. Please try again.");
+      }
+
+      attempts++;
+    }
   }
 
-  if (!job?.result?.file) {
-    throw new Error("Invalid file response from server");
-  }
-
-  return { ...job.result, downloadUrl: `/downloads/${job.result.file}` };
+  throw new Error("Timeout: Processing took too long.");
 };
 
+// 🔥 API METHODS
 export const api = {
   mergePdf: async (files) => {
     const formData = new FormData();
     files.forEach((file) => formData.append("files", file));
 
-    const response = await axios.post(`${API_BASE_URL}/merge`, formData);
+    const response = await apiClient.post("/merge", formData);
     return pollJobStatus(response.data.jobId);
   },
 
   splitPdf: async (file, startPage, endPage) => {
     const formData = new FormData();
     formData.append("file", file);
-    formData.append("startPage", Number(startPage)); // 🔥 FIX
-    formData.append("endPage", Number(endPage)); // 🔥 FIX
+    formData.append("startPage", Number(startPage));
+    formData.append("endPage", Number(endPage));
 
-    const response = await axios.post(`${API_BASE_URL}/split`, formData);
+    const response = await apiClient.post("/split", formData);
     return pollJobStatus(response.data.jobId);
   },
 
@@ -46,10 +82,7 @@ export const api = {
     const formData = new FormData();
     images.forEach((image) => formData.append("images", image));
 
-    const response = await axios.post(
-      `${API_BASE_URL}/images-to-pdf`,
-      formData,
-    );
+    const response = await apiClient.post("/images-to-pdf", formData);
     return pollJobStatus(response.data.jobId);
   },
 
@@ -58,7 +91,7 @@ export const api = {
     formData.append("file", file);
     formData.append("text", text);
 
-    const response = await axios.post(`${API_BASE_URL}/watermark`, formData);
+    const response = await apiClient.post("/watermark", formData);
     return pollJobStatus(response.data.jobId);
   },
 
@@ -67,14 +100,15 @@ export const api = {
     formData.append("file", file);
     formData.append("angle", angle);
 
-    const response = await axios.post(`${API_BASE_URL}/rotate`, formData);
+    const response = await apiClient.post("/rotate", formData);
     return pollJobStatus(response.data.jobId);
   },
 
   getJobStatus: async (jobId) => {
-    const response = await axios.get(`${API_BASE_URL}/job/${jobId}`);
+    const response = await apiClient.get(`/job/${jobId}`);
     return response.data;
   },
 
+  // ✅ ALWAYS USE THIS IN UI
   getDownloadUrl: (fileName) => `${DOWNLOAD_BASE_URL}/${fileName}`,
 };
