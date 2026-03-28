@@ -1,7 +1,8 @@
 import axios from "axios";
 
-const API_BASE_URL = "https://pdfbackend-nigf.onrender.com/api";
-const DOWNLOAD_BASE_URL = "https://pdfbackend-nigf.onrender.com/downloads";
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || `${BACKEND_URL}/api`;
+const DOWNLOAD_BASE_URL = import.meta.env.VITE_DOWNLOAD_BASE_URL || `${BACKEND_URL}/downloads`;
 
 const pollJobStatus = async (jobId) => {
   let job;
