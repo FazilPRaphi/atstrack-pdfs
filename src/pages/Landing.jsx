@@ -64,6 +64,14 @@ const TOOLS = [
     tag: null,
   },
   {
+    id: "compress",
+    title: "Compress PDF",
+    description: "Reduce the file size of your PDF documents without compromising quality.",
+    icon: Zap,
+    path: "/compress",
+    tag: null,
+  },
+  {
     id: "editor",
     title: "Advanced Editor",
     description: "Reorder, rotate, delete, and add pages visually in our pro-grade editor.",
@@ -638,7 +646,7 @@ function Footer({ onNav }) {
           © 2026 ATSTRACK-PDFS · Premium Productivity
         </p>
         <div style={{ display: "flex", gap: 20 }}>
-          {["Privacy", "Terms", "Contact"].map((l) => (
+          {[].map((l) => (
             <a key={l} href="#"
               style={{
                 fontFamily: "'Inter', sans-serif", fontSize: 13,

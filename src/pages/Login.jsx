@@ -294,9 +294,9 @@ export default function Login() {
       {/* ── Navbar ── */}
       <nav style={S.navbar}>
         <div>
-          <div style={S.logoText}>Razor</div>
+          <div style={S.logoText}>ATSTRACK</div>
           <div style={S.logoSub}>
-            Sales@Razor.uk <span style={S.logoArrow}>→</span>
+             <span style={S.logoArrow}>→</span>
           </div>
         </div>
         <div style={S.navRight}>
@@ -308,13 +308,7 @@ export default function Login() {
           >
             {isSignup ? "Login" : "Sign up"}
           </button>
-          <button
-            style={S.btnPrimary}
-            onMouseEnter={hoverBtn}
-            onMouseLeave={unhoverBtn}
-          >
-            Request Demo
-          </button>
+          
         </div>
       </nav>
 
@@ -329,7 +323,7 @@ export default function Login() {
             transition={{ duration: 0.25, ease: "easeOut" }}
             style={S.card}
           >
-            <h1 style={S.cardTitle}>{isSignup ? "Create Account" : "Agent Login"}</h1>
+            <h1 style={S.cardTitle}>{isSignup ? "Create Account" : " Login"}</h1>
             <p style={S.cardSub}>
               {isSignup
                 ? "Fill in your details to create a new account"
@@ -352,10 +346,10 @@ export default function Login() {
 
             {/* Email */}
             <div style={S.fieldGroup}>
-              <label style={S.fieldLabel}>Email / Phone</label>
+              <label style={S.fieldLabel}>Email </label>
               <input
                 type="email"
-                placeholder="Email or phone number"
+                placeholder="Email "
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 style={S.input}

@@ -11,6 +11,7 @@ import ImagesToPdf from "./pages/ImagesToPdf";
 import Watermark from "./pages/Watermark";
 import Rotate from "./pages/Rotate";
 import EditorPro from "./pages/EditorPro";
+import Compress from "./pages/Compress";
 
 function App() {
   const [user, setUser] = useState(null);
@@ -81,7 +82,10 @@ function App() {
 
       {/* Redirect unknown routes */}
       <Route path="*" element={<Navigate to="/" />} />
+
+      <Route path="/compress" element={user ? <Compress /> : <Navigate to="/login" />} />
     </Routes>
+
   );
 }
 
