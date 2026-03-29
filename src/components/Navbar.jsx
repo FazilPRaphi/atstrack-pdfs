@@ -1,7 +1,8 @@
-import { LogOut, FileText, User } from "lucide-react";
+import { LogOut, User } from "lucide-react";
 import { auth } from "../firebase";
 import { signOut } from "firebase/auth";
 import { useNavigate, Link } from "react-router-dom";
+import logo from "../assets/logo.png";
 
 export default function Navbar({ user }) {
   const navigate = useNavigate();
@@ -15,8 +16,8 @@ export default function Navbar({ user }) {
     <nav className="glass sticky top-0 z-[1000] flex h-[70px] items-center border-b border-white/10 px-6 backdrop-blur-md">
       <div className="container mx-auto flex items-center justify-between">
         <Link to="/" className="flex items-center gap-2.5 text-2xl font-extrabold text-white">
-          <FileText size={28} className="text-[var(--primary)]" />
-          <span>PDF<span className="text-[var(--primary)]">Wise</span></span>
+          <img src={logo} alt="Logo" style={{ width: 32, height: 32, borderRadius: 8, objectFit: "cover" }} />
+          <span>ATSTRACK-<span className="text-[var(--primary)]">PDFS</span></span>
         </Link>
 
         <div className="flex items-center gap-5">

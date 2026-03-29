@@ -29,22 +29,26 @@ function App() {
     <div className="flex h-screen items-center justify-center bg-[#0a0b10] text-white">
       <div className="flex flex-col items-center gap-4">
         <div className="h-10 w-10 animate-pulse rounded-full border-2 border-[var(--primary)]"></div>
-        <h2 className="text-xs font-medium tracking-[0.3em] uppercase opacity-50">Loading PDFWise</h2>
+        <h2 className="text-xs font-medium tracking-[0.3em] uppercase opacity-50">Loading ATSTRACK-PDFS</h2>
       </div>
     </div>
   );
 
   return (
     <Routes>
-      {/* Public */}
-      <Route path="/login" element={<Login />} />
-
-      {/* Protected */}
+      {/* Landing — always accessible, renders different UI based on auth */}
       <Route
         path="/"
-        element={user ? <Landing user={user} /> : <Navigate to="/login" />}
+        element={<Landing user={user} />}
       />
 
+      {/* Login — redirect to home if already signed in */}
+      <Route
+        path="/login"
+        element={user ? <Navigate to="/" /> : <Login />}
+      />
+
+      {/* Protected tool routes */}
       <Route
         path="/merge"
         element={user ? <Merge /> : <Navigate to="/login" />}

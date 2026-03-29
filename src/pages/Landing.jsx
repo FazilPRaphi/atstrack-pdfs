@@ -1,10 +1,13 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
+import { signOut } from "firebase/auth";
+import { auth } from "../firebase";
 import {
   Layers, Scissors, Image as ImageIcon, Sparkles,
-  Wand2, FileEdit, ArrowRight, Menu, X, Zap,
+  Wand2, FileEdit, ArrowRight, Menu, X, Zap, LogOut, User,
 } from "lucide-react";
+import logo from "../assets/logo.png";
 
 /* ─── Design Tokens ─────────────────────────────────────────────────────────── */
 const T = {
@@ -105,7 +108,7 @@ const Stamp = () => (
 const TornEdge = () => (
   <svg
     viewBox="0 0 1440 44" preserveAspectRatio="none"
-    style={{ display: "block", width: "100%", height: 44, marginLeft: -48, marginRight: -48, width: "calc(100% + 96px)" }}
+    style={{ display: "block", width: "calc(100% + 96px)", height: 44, marginLeft: -48, marginRight: -48 }}
   >
     <path
       d="M0,0 L40,18 L80,5 L130,22 L185,7 L245,26 L305,9 L368,28 L430,11 L492,30
@@ -150,9 +153,14 @@ function Btn({ children, variant = "primary", onClick, style: extra = {}, fullWi
   );
 }
 
-/* ─── Navbar ────────────────────────────────────────────────────────────────── */
-function Navbar({ onNav }) {
+/* ─── Navbar (auth-aware) ───────────────────────────────────────────────────── */
+function Navbar({ onNav, user }) {
   const [open, setOpen] = useState(false);
+
+  const handleLogout = async () => {
+    await signOut(auth);
+    onNav("/");
+  };
 
   return (
     <nav style={{ backgroundColor: T.bg, borderBottom: `1px solid ${T.border}`, position: "sticky", top: 0, zIndex: 50 }}>
@@ -166,30 +174,50 @@ function Navbar({ onNav }) {
           onClick={() => onNav("/")}
           style={{ display: "flex", alignItems: "center", gap: 10, background: "none", border: "none", cursor: "pointer" }}
         >
-          <div style={{
-            width: 34, height: 34, borderRadius: 9, backgroundColor: T.accent,
-            display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0
-          }}>
-            <FileEdit size={15} color="#111" strokeWidth={2.5} />
-          </div>
+          <img src={logo} alt="Logo" style={{ width: 32, height: 32, borderRadius: 8, objectFit: "cover" }} />
           <span style={{
             fontFamily: "'Playfair Display', Georgia, serif",
             fontSize: 18, fontWeight: 700, color: T.textPrimary, whiteSpace: "nowrap"
           }}>
-            PDFWise
+            ATSTRACK-PDFS
           </span>
         </button>
 
         {/* Desktop right */}
         <div style={{ display: "flex", alignItems: "center", gap: 10 }} className="desktop-nav">
-          <Btn variant="outline" onClick={() => onNav("/login")}
-            style={{ padding: "9px 20px", fontSize: 13 }}>
-            Sign in
-          </Btn>
-          <Btn variant="dark" onClick={() => onNav("/editor")}
-            style={{ padding: "9px 20px", fontSize: 13, display: "flex", alignItems: "center", gap: 6 }}>
-            <Zap size={13} /> Try EditorPro
-          </Btn>
+          {user ? (
+            <>
+              {/* Logged-in: show user pill + logout */}
+              <div style={{
+                display: "flex", alignItems: "center", gap: 8,
+                padding: "6px 14px", borderRadius: 99,
+                border: `1px solid ${T.border}`, background: T.card,
+              }}>
+                <div style={{
+                  width: 26, height: 26, borderRadius: "50%", background: T.accent,
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                }}>
+                  <User size={13} color="#111" strokeWidth={2.5} />
+                </div>
+                <span style={{
+                  fontSize: 13, fontWeight: 500, color: T.textPrimary,
+                  fontFamily: "'Inter', sans-serif", maxWidth: 140,
+                  overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+                }}>
+                  {user.email?.split("@")[0] || "User"}
+                </span>
+              </div>
+              <Btn variant="outline" onClick={handleLogout}
+                style={{ padding: "9px 18px", fontSize: 13, display: "flex", alignItems: "center", gap: 6 }}>
+                <LogOut size={13} /> Logout
+              </Btn>
+            </>
+          ) : (
+            <Btn variant="dark" onClick={() => onNav("/login")}
+                style={{ padding: "9px 20px", fontSize: 13, display: "flex", alignItems: "center", gap: 6 }}>
+                <Zap size={13} /> Try EditorPro
+              </Btn>
+          )}
         </div>
 
         {/* Mobile hamburger */}
@@ -208,11 +236,35 @@ function Navbar({ onNav }) {
           initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }}
           style={{ backgroundColor: T.card, borderTop: `1px solid ${T.border}`, padding: "16px 24px 20px" }}
         >
-          <Btn variant="outline" fullWidth onClick={() => { onNav("/login"); setOpen(false); }}
-            style={{ marginBottom: 10 }}>Sign in</Btn>
-          <Btn variant="dark" fullWidth onClick={() => { onNav("/editor"); setOpen(false); }}>
-            <Zap size={13} /> Try EditorPro
-          </Btn>
+          {user ? (
+            <>
+              <div style={{
+                display: "flex", alignItems: "center", gap: 8,
+                marginBottom: 12, padding: "8px 0",
+              }}>
+                <div style={{
+                  width: 28, height: 28, borderRadius: "50%", background: T.accent,
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                }}>
+                  <User size={14} color="#111" />
+                </div>
+                <span style={{ fontSize: 14, fontWeight: 500, color: T.textPrimary, fontFamily: "'Inter', sans-serif" }}>
+                  {user.email?.split("@")[0] || "User"}
+                </span>
+              </div>
+              <Btn variant="outline" fullWidth onClick={() => { handleLogout(); setOpen(false); }}>
+                <LogOut size={13} /> Logout
+              </Btn>
+            </>
+          ) : (
+            <>
+              <Btn variant="outline" fullWidth onClick={() => { onNav("/login"); setOpen(false); }}
+                style={{ marginBottom: 10 }}>Sign in</Btn>
+              <Btn variant="dark" fullWidth onClick={() => { onNav("/login"); setOpen(false); }}>
+                <Zap size={13} /> Try EditorPro
+              </Btn>
+            </>
+          )}
         </motion.div>
       )}
 
@@ -229,7 +281,7 @@ function Navbar({ onNav }) {
   );
 }
 
-/* ─── Hero ──────────────────────────────────────────────────────────────────── */
+/* ─── Hero (public / marketing) ─────────────────────────────────────────────── */
 function Hero({ onNav }) {
   return (
     <section style={{ backgroundColor: T.bg, padding: "72px 24px 0", overflow: "hidden" }}>
@@ -271,14 +323,14 @@ function Hero({ onNav }) {
           Powerful, secure, and elegant tools to edit, convert, and organize your documents — for free.
         </motion.p>
 
-        {/* CTA row */}
+        {/* CTA row — both go to /login for unauthenticated users */}
         <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.45, delay: 0.2 }}
           style={{ display: "flex", justifyContent: "center", gap: 12, flexWrap: "wrap", marginTop: 32 }}>
-          <Btn variant="primary" onClick={() => onNav("/editor")}>
+          <Btn variant="primary" onClick={() => onNav("/login")}>
             Start Editing <ArrowRight size={14} />
           </Btn>
-          <Btn variant="outline" onClick={() => onNav("/merge")}>
+          <Btn variant="outline" onClick={() => onNav("/login")}>
             View All Tools
           </Btn>
         </motion.div>
@@ -322,7 +374,7 @@ function Hero({ onNav }) {
               Drag to reorder, rotate, delete, or insert pages in a visual canvas. No uploads to external servers.
             </p>
             <div style={{ marginBottom: 40 }}>
-              <Btn variant="dark" onClick={() => onNav("/editor")}>
+              <Btn variant="dark" onClick={() => onNav("/login")}>
                 Open Editor <ArrowRight size={13} />
               </Btn>
             </div>
@@ -333,6 +385,58 @@ function Hero({ onNav }) {
         </motion.div>
       </div>
     </section>
+  );
+}
+
+/* ─── Welcome Banner (logged-in dashboard header) ───────────────────────────── */
+function WelcomeBanner({ user }) {
+  const displayName = user?.displayName || user?.email?.split("@")[0] || "there";
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      style={{
+        background: `linear-gradient(135deg, ${T.green} 0%, #1a5456 100%)`,
+        borderRadius: 18, padding: "36px 40px", marginBottom: 36,
+        position: "relative", overflow: "hidden",
+      }}
+    >
+      {/* Decorative circles */}
+      <div style={{
+        position: "absolute", right: -30, top: -30,
+        width: 140, height: 140, borderRadius: "50%",
+        border: `2px solid rgba(255,255,255,0.08)`,
+        pointerEvents: "none",
+      }} />
+      <div style={{
+        position: "absolute", right: 40, bottom: -20,
+        width: 80, height: 80, borderRadius: "50%",
+        border: `2px solid rgba(255,255,255,0.06)`,
+        pointerEvents: "none",
+      }} />
+
+      <p style={{
+        fontFamily: "'Inter', sans-serif", fontSize: 12,
+        letterSpacing: "0.12em", color: T.accent, fontWeight: 600,
+        marginBottom: 8, textTransform: "uppercase",
+      }}>
+        ✦ Welcome back
+      </p>
+      <h2 style={{
+        fontFamily: "'Playfair Display', Georgia, serif",
+        fontSize: "clamp(24px, 3vw, 34px)", fontWeight: 700,
+        color: "#fff", lineHeight: 1.2, marginBottom: 6,
+      }}>
+        Hey {displayName} 👋
+      </h2>
+      <p style={{
+        fontFamily: "'Inter', sans-serif", fontSize: 14,
+        color: "rgba(255,255,255,0.55)", lineHeight: 1.6,
+      }}>
+        Pick a tool below to get started with your PDFs.
+      </p>
+    </motion.div>
   );
 }
 
@@ -463,11 +567,14 @@ function ToolCard({ tool, index, onNav }) {
 }
 
 /* ─── Tools Section ─────────────────────────────────────────────────────────── */
-function ToolsSection({ onNav }) {
+function ToolsSection({ onNav, user }) {
   const [activeFilter, setActiveFilter] = useState("All Tools");
   return (
     <section style={{ backgroundColor: T.bg, padding: "80px 24px" }}>
       <div style={{ maxWidth: 1280, margin: "0 auto" }}>
+
+        {/* Welcome banner for logged-in users */}
+        {user && <WelcomeBanner user={user} />}
 
         {/* Header row */}
         <div style={{
@@ -522,13 +629,13 @@ function Footer({ onNav }) {
             fontSize: 16, fontWeight: 700, color: "#fff",
             background: "none", border: "none", cursor: "pointer"
           }}>
-          PDFWise
+          ATSTRACK-PDFS
         </button>
         <p style={{
           fontFamily: "'Inter', sans-serif", fontSize: 13,
           color: "rgba(255,255,255,0.38)", textAlign: "center"
         }}>
-          © 2026 PDFWise · Premium Productivity
+          © 2026 ATSTRACK-PDFS · Premium Productivity
         </p>
         <div style={{ display: "flex", gap: 20 }}>
           {["Privacy", "Terms", "Contact"].map((l) => (
@@ -546,8 +653,8 @@ function Footer({ onNav }) {
   );
 }
 
-/* ─── Root Landing Page ─────────────────────────────────────────────────────── */
-export default function Landing() {
+/* ─── Root Landing Page (DUAL MODE) ─────────────────────────────────────────── */
+export default function Landing({ user }) {
   const navigate = useNavigate();
 
   return (
@@ -559,9 +666,13 @@ export default function Landing() {
         button { outline: none; }
       `}</style>
 
-      <Navbar onNav={navigate} />
-      <Hero onNav={navigate} />
-      <ToolsSection onNav={navigate} />
+      <Navbar onNav={navigate} user={user} />
+
+      {/* MODE 1: Not logged in → Hero + Tools (as marketing) */}
+      {/* MODE 2: Logged in   → Tools only (as dashboard)    */}
+      {!user && <Hero onNav={navigate} />}
+
+      <ToolsSection onNav={navigate} user={user} />
       <Footer onNav={navigate} />
     </div>
   );

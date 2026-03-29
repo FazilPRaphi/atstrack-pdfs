@@ -9,6 +9,8 @@ import {
 
 import { api } from "../api";
 import { auth } from "../firebase";
+import logo from "../assets/logo.png";
+import BackButton from "../components/BackButton";
 
 /* ─── Design Tokens ─────────────────────────────────────────────────────────── */
 const T = {
@@ -77,22 +79,14 @@ function Navbar({ onNav }) {
             display: "flex", alignItems: "center", gap: 10,
             background: "none", border: "none", cursor: "pointer"
           }}>
-          <div style={{
-            width: 34, height: 34, borderRadius: 9, backgroundColor: T.accent,
-            display: "flex", alignItems: "center", justifyContent: "center"
-          }}>
-            <FileEdit size={15} color="#111" strokeWidth={2.5} />
-          </div>
+          <img src={logo} alt="Logo" style={{ width: 32, height: 32, borderRadius: 8, objectFit: "cover" }} />
           <span style={{
             fontFamily: "'Playfair Display', Georgia, serif",
             fontSize: 18, fontWeight: 700, color: T.textPrimary
-          }}>PDFWise</span>
+          }}>ATSTRACK-PDFS</span>
         </button>
 
         <div className="d-nav" style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <Btn variant="outline" onClick={() => onNav("/login")} style={{ padding: "9px 20px", fontSize: 13 }}>
-            Sign in
-          </Btn>
           <Btn variant="dark" onClick={() => onNav("/editor")} style={{ padding: "9px 20px", fontSize: 13 }}>
             <Zap size={13} /> Try EditorPro
           </Btn>
@@ -278,6 +272,7 @@ export default function Split() {
         @keyframes spin { to { transform: rotate(360deg); } }
       `}</style>
 
+      <BackButton />
       <Navbar onNav={navigate} />
 
       <main style={{
