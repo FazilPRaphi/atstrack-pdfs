@@ -41,103 +41,92 @@ export default function Watermark() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col bg-[#0a0b10]">
+    <div style={{ backgroundColor: "#F4F1EA", minHeight: "100vh" }}>
       <Navbar user={auth.currentUser} />
-      
-      <main className="container mx-auto max-w-3xl flex-1 px-6 py-16">
-        <div className="mb-12 text-center">
-          <div className="glass mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl">
-            <Sparkles className="text-amber-500" size={24} />
-          </div>
-          <h1 className="mb-3 text-4xl font-extrabold text-white">Watermark PDF</h1>
-          <p className="text-lg text-slate-400">Stamp text over your PDF to protect its copyright securely.</p>
+
+      <main style={{ padding: "80px 24px", textAlign: "center" }}>
+
+        <h1 style={{
+          fontFamily: "'Playfair Display', serif",
+          fontSize: 48,
+          marginBottom: 10
+        }}>
+          WATERMARK PDF
+        </h1>
+
+        <p style={{ color: "#6B6B6B", marginBottom: 40 }}>
+          Add text watermark to protect your document.
+        </p>
+
+        {/* HERO CARD */}
+        <div style={{
+          maxWidth: 900,
+          margin: "0 auto 60px",
+          backgroundColor: "#E8DDC7",
+          borderRadius: 16,
+          padding: "60px 40px",
+          textAlign: "left"
+        }}>
+          <h2 style={{
+            fontFamily: "'Playfair Display', serif",
+            fontSize: 36
+          }}>
+            Secure your PDFs <br /> with watermark text.
+          </h2>
         </div>
 
-        <div className="relative">
-          <AnimatePresence mode="wait">
-            {!result ? (
-              <Motion.div
-                key="upload-form"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                className="glass flex flex-col gap-6 rounded-3xl p-8"
-              >
-                <FileUpload 
-                  onFilesSelected={(files) => setFile(files[0] || null)} 
-                />
+        {/* TOOL CARD */}
+        <div style={{
+          maxWidth: 520,
+          margin: "0 auto",
+          backgroundColor: "#fff",
+          borderRadius: 16,
+          padding: "40px",
+          boxShadow: "0 4px 24px rgba(0,0,0,0.05)"
+        }}>
 
-                <div className="flex flex-col gap-2 rounded-2xl bg-white/5 p-5">
-                  <label className="text-xs font-bold uppercase tracking-wider text-slate-500">Watermark Text</label>
-                  <input 
-                    type="text" 
-                    value={text}
-                    onChange={(e) => setText(e.target.value)}
-                    className="rounded-lg border border-white/10 bg-white/5 p-2.5 text-white outline-none focus:border-amber-500 disabled:opacity-50"
-                    placeholder="e.g. DRAFT, CONFIDENTIAL"
-                  />
-                  <p className="text-[10px] text-slate-500 mt-1">This text will be stamped diagonally across every page.</p>
-                </div>
+          <FileUpload onFilesSelected={(f) => setFile(f[0])} />
 
-                {error && (
-                  <div className="flex items-center gap-2.5 rounded-xl bg-red-500/10 p-4 text-sm text-red-500">
-                    <AlertCircle size={18} />
-                    <span>{error}</span>
-                  </div>
-                )}
+          <input
+            type="text"
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            placeholder="Enter watermark text"
+            style={{
+              width: "100%",
+              marginTop: 16,
+              padding: 12,
+              borderRadius: 10,
+              border: "1px solid #E5E5E5"
+            }}
+          />
 
-                <button
-                  onClick={handleWatermark}
-                  disabled={!file || !text || isProcessing}
-                  className="mt-3 flex items-center justify-center gap-3 rounded-xl bg-amber-500 py-4 font-bold text-white shadow-lg transition-all hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  {isProcessing ? (
-                    <>
-                      <Loader2 size={20} className="animate-spin" />
-                      <span>Processing...</span>
-                    </>
-                  ) : (
-                    <>
-                      <Sparkles size={20} />
-                      <span>Add Watermark</span>
-                    </>
-                  )}
-                </button>
-              </Motion.div>
-            ) : (
-              <Motion.div
-                key="success-card"
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="glass flex flex-col items-center gap-4 rounded-3xl p-12 text-center"
-              >
-                <div className="mb-2">
-                  <RefreshCw size={48} className="text-green-500" />
-                </div>
-                <h2 className="text-2xl font-bold text-white">Watermark Added Successfully!</h2>
-                <p className="text-slate-400">Your protected PDF is ready for download.</p>
-                
-                <div className="mt-6 flex w-full max-w-xs flex-col gap-3">
-                  <a 
-                    href={api.getDownloadUrl(result.file)} 
-                    download 
-                    className="flex items-center justify-center gap-3 rounded-xl bg-amber-500 py-4 font-bold text-white shadow-lg transition-all hover:brightness-110"
-                  >
-                    <Download size={20} />
-                    <span>Download PDF</span>
-                  </a>
-                  
-                  <button 
-                    onClick={reset} 
-                    className="flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/5 py-4 font-medium text-slate-300 transition-all hover:bg-white/10 hover:text-white"
-                  >
-                    <RefreshCw size={18} />
-                    <span>Watermark Another</span>
-                  </button>
-                </div>
-              </Motion.div>
-            )}
-          </AnimatePresence>
+          {error && (
+            <div style={{
+              marginTop: 16,
+              background: "#FEF2F2",
+              padding: 12,
+              borderRadius: 10,
+              color: "#dc2626"
+            }}>
+              {error}
+            </div>
+          )}
+
+          <button
+            onClick={handleWatermark}
+            style={{
+              width: "100%",
+              marginTop: 20,
+              padding: "14px",
+              borderRadius: 10,
+              backgroundColor: "#E6B36A",
+              border: "none",
+              fontWeight: 600
+            }}
+          >
+            Add Watermark
+          </button>
         </div>
       </main>
     </div>
